@@ -90,55 +90,51 @@ function App() {
 Now, in a React component, you can use mutations from your query client to interact with the API through your proxy server:
 
 ```typescript
-import { useState } from 'react'
 import { ImagesResponse, isResponseError, useCreateImageMutation } from '@elkwood/openai-rtk-client'
 
 export function MyComponent() {
-  // Local state to store the response
-  const [images, setImages] = useState<null | ImagesResponse>(null)
   // Hook to initiate a mutation
-  const [createImageMutation, { isLoading }] = useCreateImageMutation({})
+  const [createImageMutation, { isError, data, isLoading }] =
+    useCreateImageMutation({})
 
   return (
-    <div>
+    <>
       <form
-        onSubmit={async (event) => {
-          event.preventDefault();
-          const formData = new FormData(event.target);
-          const prompt = formData.get('prompt');
-          if(typeof prompt === 'string') {
-            const response = await createImageMutation({
-              createImageRequest: {
-                model: 'dall-e-3',
-                prompt: prompt,
-              },
-            })
+        action={async (inputs) => {
+          const response = await createImageMutation({
+            createImageRequest: {
+              model: 'dall-e-3',
+              prompt: inputs.get('prompt') as string,
+            },
+          })
 
-            // Use isResponseError utility to determine response type
-            if (isResponseError(response)) {
-              console.error(response)
-              return alert('Error creating image')
-            }
-
-            setImages(response.data)
+          if (isResponseError(response)) {
+            console.error(response)
+            return alert('error creating image')
           }
         }}>
         <input
           name="prompt"
-          placeholder="Enter a prompt"
+          placeholder="message"
           required
           type="text"
         />
-        <button type="submit" disabled={isLoading}>Create Image</button>
+        <button
+          disabled={isLoading}
+          type="submit">
+          Create Image
+        </button>
       </form>
-      {images && images.data.map((image) => (
-        <img
-          alt={image.revised_prompt}
-          key={image.url}
-          src={image.url}
-        />
-      ))}
-    </div>
+      {isError && <p>Error creating image</p>}
+      {data &&
+        data.data.map((image) => (
+          <img
+            alt={image.revised_prompt}
+            key={image.url}
+            src={image.url}
+          />
+        ))}
+    </>
   )
 }
 ```
