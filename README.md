@@ -73,7 +73,7 @@ setupListeners(store.dispatch)
 
 // Before making any requests, set the base URL of your API proxy server and optional authorization headers
 store.dispatch(apiSlice.actions.setBaseUrl('/your-api-proxy'))
-store.dispatch(apiSlice.actions.setHeaders('Authorization', `Bearer ${user_token_from_somewhere}`))
+store.dispatch(apiSlice.actions.setHeaders({Authorization: `Bearer ${user_token_from_somewhere}`})
 
 // Wrap your application's root component with Redux Provider and pass the configured store
 function App() {
